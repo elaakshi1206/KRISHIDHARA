@@ -11,6 +11,8 @@ import {
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
 import { pushUserDetails } from "@/utils/supabase/profile";
+import { uploadMedia } from "@/utils/supabase/storage";
+import { Camera, Image as ImageIcon, Video, X } from "lucide-react";
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -42,7 +44,10 @@ export default function OnboardingPage() {
     challenges: [] as string[],
     alerts: { weather: true, price: true, pest: true, schemes: true },
     pastSchemes: [] as string[],
-    supportInterests: [] as string[]
+    supportInterests: [] as string[],
+    // Media
+    profileImage: "",
+    farmMedia: [] as string[]
   });
 
   const nextStep = () => {
@@ -52,6 +57,26 @@ export default function OnboardingPage() {
 
   const prevStep = () => {
     if (step > 1) setStep(step - 1);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'farm') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    try {
+      const publicUrl = await uploadMedia(file);
+      if (type === 'profile') {
+        setFormData({ ...formData, profileImage: publicUrl });
+      } else {
+        setFormData({ ...formData, farmMedia: [...formData.farmMedia, publicUrl] });
+      }
+      toast.success("File uploaded successfully!");
+    } catch (error) {
+      toast.error("Upload failed. Please check your storage bucket.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleComplete = async () => {
@@ -70,6 +95,7 @@ export default function OnboardingPage() {
         full_name: formData.name,
         district: formData.district,
         state: formData.state,
+        profile_image: formData.profileImage, // Saved to main profile
         // We can add more fields as metadata or specific columns
         village: formData.village,
         age_group: formData.ageGroup,
@@ -88,7 +114,8 @@ export default function OnboardingPage() {
           challenges: formData.challenges,
           alerts: formData.alerts,
           past_schemes: formData.pastSchemes,
-          support_interests: formData.supportInterests
+          support_interests: formData.supportInterests,
+          farm_media: formData.farmMedia // Saved as part of farm details
         }
       });
 
@@ -155,9 +182,24 @@ export default function OnboardingPage() {
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <div className="space-y-6">
+                <div className="flex flex-col items-center justify-center py-4">
+                  <div className="relative w-24 h-24 bg-slate-200 rounded-full overflow-hidden mb-2 border-4 border-white shadow-sm">
+                    {formData.profileImage ? (
+                      <img src={formData.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <User size={48} className="absolute inset-0 m-auto text-slate-400" />
+                    )}
+                    <label className="absolute bottom-0 right-0 left-0 bg-black/50 text-white p-1 flex justify-center cursor-pointer">
+                      <Camera size={16} />
+                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'profile')} />
+                    </label>
+                  </div>
+                  <p className="text-xs text-slate-500 font-bold uppercase">Add Photo</p>
+                </div>
+
                 <div className="bg-primary-green-light/30 p-4 rounded-2xl border border-primary-green/10">
-                  <p className="text-primary-green-dark font-medium text-sm flex gap-2">
-                    <User size={18} /> Namaste! Let's personalize KrishiDhara for your farm.
+                  <p className="text-primary-green-dark font-medium text-sm flex gap-2 text-center">
+                    Namaste! Let's personalize KrishiDhara for your farm.
                   </p>
                 </div>
 
@@ -327,6 +369,28 @@ export default function OnboardingPage() {
                     <option value="Sprinkler">Sprinkler</option>
                     <option value="Rainfed">Rainfed</option>
                   </select>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="block text-sm font-bold text-slate-700">Farm Photos / Videos</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {formData.farmMedia.map((url, idx) => (
+                      <div key={idx} className="relative aspect-square bg-slate-200 rounded-xl overflow-hidden border">
+                        <img src={url} className="w-full h-full object-cover" />
+                        <button 
+                          onClick={() => setFormData({...formData, farmMedia: formData.farmMedia.filter((_, i) => i !== idx)})}
+                          className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    <label className="aspect-square bg-slate-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-slate-200 text-slate-400 cursor-pointer">
+                      <ImageIcon size={24} />
+                      <span className="text-[10px] font-bold mt-1 uppercase">Add</span>
+                      <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, 'farm')} />
+                    </label>
+                  </div>
                 </div>
               </div>
             )}

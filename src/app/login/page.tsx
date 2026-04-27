@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Phone, Mail, ArrowRight, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "@/utils/supabase/client";
 
 export default function LoginPage() {
   const [method, setMethod] = useState<"phone" | "email">("phone");
@@ -16,48 +15,32 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSendOTP = async () => {
+  const handleSendOTP = () => {
     if (!inputValue) {
       toast.error(method === "phone" ? "Please enter your mobile number" : "Please enter your email");
       return;
     }
     setLoading(true);
-    
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      [method === "phone" ? "phone" : "email"]: method === "phone" ? `+91${inputValue}` : inputValue,
-    });
-
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
+    // Simulate API call for demo purposes
+    setTimeout(() => {
+      setLoading(false);
       setStep("otp");
-      toast.success("OTP sent successfully!");
-    }
+      toast.success("OTP sent successfully! (Demo Mode)");
+    }, 1500);
   };
 
-  const handleVerifyOTP = async () => {
+  const handleVerifyOTP = () => {
     if (otp.length < 4) {
-      toast.error("Please enter a valid OTP");
+      toast.error("Please enter a valid 4-digit OTP");
       return;
     }
     setLoading(true);
-    
-    const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({
-      [method === "phone" ? "phone" : "email"]: method === "phone" ? `+91${inputValue}` : inputValue,
-      token: otp,
-      type: method === "phone" ? 'sms' : 'email',
-    });
-
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
+    // Simulate verification for demo purposes
+    setTimeout(() => {
+      setLoading(false);
       toast.success("Login successful!");
       router.push("/setup");
-    }
+    }, 1500);
   };
 
   return (
