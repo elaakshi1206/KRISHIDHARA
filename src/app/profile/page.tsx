@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, User, LogOut, Settings, Bell, Shield, HelpCircle } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -13,7 +14,9 @@ export default function ProfilePage() {
     if (data) setUser(JSON.parse(data));
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
     localStorage.removeItem("krishidhara_user");
     localStorage.removeItem("krishidhara_visited");
     router.push("/splash");

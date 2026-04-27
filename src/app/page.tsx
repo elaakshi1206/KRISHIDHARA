@@ -10,25 +10,57 @@ import {
   ChevronRight, ArrowUpRight, Plus
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { createClient } from "@/utils/supabase/client";
+import { fetchUserDetails } from "@/utils/supabase/profile";
 
 export default function Dashboard() {
   const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const hasVisited = localStorage.getItem("krishidhara_visited");
-    if (!hasVisited) {
-      localStorage.setItem("krishidhara_visited", "true");
-      router.push("/splash");
-      return;
-    }
+    const checkUser = async () => {
+      const hasVisited = localStorage.getItem("krishidhara_visited");
+      if (!hasVisited) {
+        localStorage.setItem("krishidhara_visited", "true");
+        router.push("/splash");
+        return;
+      }
 
-    const savedData = localStorage.getItem("krishidhara_user");
-    if (!savedData) {
-      router.push("/splash"); // Force splash/onboarding if no data
-    } else {
-      setUserData(JSON.parse(savedData));
-    }
+      const savedData = localStorage.getItem("krishidhara_user");
+      if (savedData) {
+        setUserData(JSON.parse(savedData));
+        return;
+      }
+
+      // If no local storage, try fetching from Supabase
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        try {
+          const profile = await fetchUserDetails(user.id);
+          if (profile) {
+            const formattedData = {
+              name: profile.full_name,
+              village: profile.village,
+              state: profile.state,
+              ...profile.farm_details
+            };
+            setUserData(formattedData);
+            localStorage.setItem("krishidhara_user", JSON.stringify(formattedData));
+          } else {
+            router.push("/setup");
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+          router.push("/splash");
+        }
+      } else {
+        router.push("/splash");
+      }
+    };
+
+    checkUser();
   }, [router]);
 
   if (!userData) return null;
