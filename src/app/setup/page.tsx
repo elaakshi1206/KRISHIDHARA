@@ -4,15 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  User, MapPin, Sprout, Droplets, Monitor, 
-  Search, Check, ChevronRight, ChevronLeft, 
-  Activity, Landmark, ShieldCheck, HelpCircle
+  User, MapPin, Sprout, Search, Check, ChevronRight, ChevronLeft, 
+  Activity, Landmark, ShieldCheck, HelpCircle, Camera, Image as ImageIcon, X
 } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "@/utils/supabase/client";
-import { pushUserDetails } from "@/utils/supabase/profile";
-import { uploadMedia } from "@/utils/supabase/storage";
-import { Camera, Image as ImageIcon, Video, X } from "lucide-react";
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -27,6 +22,7 @@ export default function OnboardingPage() {
     district: "",
     village: "",
     ageGroup: "",
+    profileImage: "",
     // Step 2: Farm
     landArea: "",
     landUnit: "acres",
@@ -44,10 +40,7 @@ export default function OnboardingPage() {
     challenges: [] as string[],
     alerts: { weather: true, price: true, pest: true, schemes: true },
     pastSchemes: [] as string[],
-    supportInterests: [] as string[],
-    // Media
-    profileImage: "",
-    farmMedia: [] as string[]
+    supportInterests: [] as string[]
   });
 
   const nextStep = () => {
@@ -59,83 +52,25 @@ export default function OnboardingPage() {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'farm') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleComplete = () => {
     setLoading(true);
-    try {
-      const publicUrl = await uploadMedia(file);
-      if (type === 'profile') {
-        setFormData({ ...formData, profileImage: publicUrl });
-      } else {
-        setFormData({ ...formData, farmMedia: [...formData.farmMedia, publicUrl] });
-      }
-      toast.success("File uploaded successfully!");
-    } catch (error) {
-      toast.error("Upload failed. Please check your storage bucket.");
-    } finally {
+    // Purely mock completion for demo
+    setTimeout(() => {
       setLoading(false);
-    }
-  };
-
-  const handleComplete = async () => {
-    setLoading(true);
-    try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please login first to save your profile.");
-        router.push("/login");
-        return;
-      }
-
-      await pushUserDetails(user.id, {
-        full_name: formData.name,
-        district: formData.district,
-        state: formData.state,
-        profile_image: formData.profileImage, // Saved to main profile
-        // We can add more fields as metadata or specific columns
-        village: formData.village,
-        age_group: formData.ageGroup,
-        farm_details: {
-          land_area: formData.landArea,
-          land_unit: formData.landUnit,
-          land_status: formData.landStatus,
-          crops: formData.crops,
-          seasons: formData.seasons,
-          irrigation: formData.irrigation,
-          monitoring_tools: formData.monitoringTools,
-          soil_health: formData.soilHealth,
-          pest_management: formData.pestManagement,
-          machinery: formData.machinery,
-          last_yield: formData.lastYield,
-          challenges: formData.challenges,
-          alerts: formData.alerts,
-          past_schemes: formData.pastSchemes,
-          support_interests: formData.supportInterests,
-          farm_media: formData.farmMedia // Saved as part of farm details
-        }
-      });
-
-      toast.success("Namaste! Your profile is ready and synced.");
+      toast.success("Namaste! Your profile is ready.");
       localStorage.setItem("krishidhara_user", JSON.stringify(formData));
       router.push("/");
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      toast.error("Failed to sync profile with backend.");
-    } finally {
-      setLoading(false);
-    }
+    }, 1500);
   };
 
   const toggleMultiSelect = (key: keyof typeof formData, value: string) => {
     const current = formData[key] as string[];
-    if (current.includes(value)) {
-      setFormData({ ...formData, [key]: current.filter(v => v !== value) });
-    } else {
-      setFormData({ ...formData, [key]: [...current, value] });
+    if (Array.isArray(current)) {
+      if (current.includes(value)) {
+        setFormData({ ...formData, [key]: current.filter(v => v !== value) });
+      } else {
+        setFormData({ ...formData, [key]: [...current, value] });
+      }
     }
   };
 
@@ -183,22 +118,17 @@ export default function OnboardingPage() {
             {step === 1 && (
               <div className="space-y-6">
                 <div className="flex flex-col items-center justify-center py-4">
-                  <div className="relative w-24 h-24 bg-slate-200 rounded-full overflow-hidden mb-2 border-4 border-white shadow-sm">
-                    {formData.profileImage ? (
-                      <img src={formData.profileImage} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <User size={48} className="absolute inset-0 m-auto text-slate-400" />
-                    )}
-                    <label className="absolute bottom-0 right-0 left-0 bg-black/50 text-white p-1 flex justify-center cursor-pointer">
-                      <Camera size={16} />
-                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'profile')} />
-                    </label>
+                  <div className="relative w-24 h-24 bg-slate-200 rounded-full overflow-hidden mb-2 border-4 border-white shadow-sm flex items-center justify-center">
+                    <User size={48} className="text-slate-400" />
+                    <div className="absolute bottom-0 right-0 left-0 bg-black/30 text-white p-1 flex justify-center">
+                      <Camera size={14} />
+                    </div>
                   </div>
                   <p className="text-xs text-slate-500 font-bold uppercase">Add Photo</p>
                 </div>
 
                 <div className="bg-primary-green-light/30 p-4 rounded-2xl border border-primary-green/10">
-                  <p className="text-primary-green-dark font-medium text-sm flex gap-2 text-center">
+                  <p className="text-primary-green-dark font-medium text-sm text-center">
                     Namaste! Let's personalize KrishiDhara for your farm.
                   </p>
                 </div>
@@ -255,6 +185,7 @@ export default function OnboardingPage() {
                     {["<30", "30-45", "45-60", ">60"].map(age => (
                       <button
                         key={age}
+                        type="button"
                         onClick={() => setFormData({...formData, ageGroup: age})}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
                           formData.ageGroup === age 
@@ -304,6 +235,7 @@ export default function OnboardingPage() {
                     {["Own", "Lease", "Both"].map(status => (
                       <button
                         key={status}
+                        type="button"
                         onClick={() => setFormData({...formData, landStatus: status})}
                         className={`py-3 rounded-xl text-sm font-semibold border ${
                           formData.landStatus === status 
@@ -323,6 +255,7 @@ export default function OnboardingPage() {
                     {cropsList.map(crop => (
                       <button
                         key={crop}
+                        type="button"
                         onClick={() => toggleMultiSelect("crops", crop)}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
                           formData.crops.includes(crop) 
@@ -342,6 +275,7 @@ export default function OnboardingPage() {
                     {seasonsList.map(season => (
                       <button
                         key={season}
+                        type="button"
                         onClick={() => toggleMultiSelect("seasons", season)}
                         className={`py-3 rounded-xl text-sm font-semibold border ${
                           formData.seasons.includes(season) 
@@ -370,28 +304,6 @@ export default function OnboardingPage() {
                     <option value="Rainfed">Rainfed</option>
                   </select>
                 </div>
-
-                <div className="space-y-3">
-                  <label className="block text-sm font-bold text-slate-700">Farm Photos / Videos</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {formData.farmMedia.map((url, idx) => (
-                      <div key={idx} className="relative aspect-square bg-slate-200 rounded-xl overflow-hidden border">
-                        <img src={url} className="w-full h-full object-cover" />
-                        <button 
-                          onClick={() => setFormData({...formData, farmMedia: formData.farmMedia.filter((_, i) => i !== idx)})}
-                          className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                    <label className="aspect-square bg-slate-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-slate-200 text-slate-400 cursor-pointer">
-                      <ImageIcon size={24} />
-                      <span className="text-[10px] font-bold mt-1 uppercase">Add</span>
-                      <input type="file" className="hidden" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, 'farm')} />
-                    </label>
-                  </div>
-                </div>
               </div>
             )}
 
@@ -404,6 +316,7 @@ export default function OnboardingPage() {
                     {["WhatsApp", "Weather Apps", "Soil Testing", "Drones", "None"].map(tool => (
                       <button
                         key={tool}
+                        type="button"
                         onClick={() => toggleMultiSelect("monitoringTools", tool)}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold border ${
                           formData.monitoringTools.includes(tool) 
@@ -438,6 +351,7 @@ export default function OnboardingPage() {
                     {["Chemical", "Organic/Biological", "Integrated (IPM)", "Traditional"].map(p => (
                       <button
                         key={p}
+                        type="button"
                         onClick={() => setFormData({...formData, pestManagement: p})}
                         className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold border ${
                           formData.pestManagement === p 
@@ -476,6 +390,7 @@ export default function OnboardingPage() {
                     {challengesList.map(c => (
                       <button
                         key={c}
+                        type="button"
                         onClick={() => toggleMultiSelect("challenges", c)}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold border ${
                           formData.challenges.includes(c) 
@@ -498,6 +413,7 @@ export default function OnboardingPage() {
                       {schemesList.map(s => (
                         <button
                           key={s}
+                          type="button"
                           onClick={() => toggleMultiSelect("pastSchemes", s)}
                           className={`px-4 py-2 rounded-xl text-sm font-semibold border ${
                             formData.pastSchemes.includes(s) 
@@ -517,6 +433,7 @@ export default function OnboardingPage() {
                       {supportList.map(s => (
                         <button
                           key={s}
+                          type="button"
                           onClick={() => toggleMultiSelect("supportInterests", s)}
                           className={`px-4 py-2 rounded-xl text-sm font-semibold border ${
                             formData.supportInterests.includes(s) 

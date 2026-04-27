@@ -39,6 +39,7 @@ export default function LoginPage() {
     setTimeout(() => {
       setLoading(false);
       toast.success("Login successful!");
+      localStorage.setItem("krishidhara_demo_mode", "true");
       router.push("/setup");
     }, 1500);
   };
