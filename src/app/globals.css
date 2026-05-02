@@ -3,41 +3,43 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f0fdf4;
+  --foreground: #14532d;
   
-  --primary-green: #15803d;
-  --primary-green-light: #dcfce7;
-  --primary-green-dark: #166534;
+  --primary-green: #16a34a;
+  --primary-green-light: #bbf7d0;
+  --primary-green-dark: #15803d;
+  --primary-green-xlight: #f0fdf4;
   
-  --soil-brown: #8D6E63;
-  --soil-brown-light: #D7CCC8;
-  --soil-brown-dark: #5D4037;
-  
-  --accent-saffron: #F59E0B;
-  --accent-gold: #fbbf24;
+  --yellow-accent: #eab308;
+  --yellow-light: #fef9c3;
+  --yellow-dark: #ca8a04;
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-[#f0fdf4] text-[#14532d] font-sans antialiased;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-[var(--primary-green)] text-white px-6 py-3 rounded-xl font-semibold shadow-lg active:scale-95 transition-all hover:bg-[var(--primary-green-dark)];
+    @apply bg-[var(--primary-green)] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-700/20 active:scale-95 transition-all hover:bg-[var(--primary-green-dark)];
   }
   
   .btn-secondary {
-    @apply bg-white border-2 border-[var(--primary-green)] text-[var(--primary-green)] px-6 py-3 rounded-xl font-semibold active:scale-95 transition-all hover:bg-[var(--primary-green-light)];
+    @apply bg-[var(--primary-green-xlight)] border-2 border-[var(--primary-green)] text-[var(--primary-green)] px-6 py-3 rounded-xl font-bold active:scale-95 transition-all hover:bg-[var(--primary-green-light)];
+  }
+
+  .btn-yellow {
+    @apply bg-[var(--yellow-accent)] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-yellow-500/20 active:scale-95 transition-all hover:bg-[var(--yellow-dark)];
   }
 
   .card {
-    @apply bg-white rounded-2xl p-4 shadow-sm border border-slate-100;
+    @apply bg-white rounded-2xl p-4 shadow-sm border border-green-100;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary-green)] focus:border-transparent transition-all;
+    @apply w-full px-4 py-3 rounded-xl border border-green-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary-green)] focus:border-transparent transition-all bg-white;
   }
 }

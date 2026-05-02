@@ -8,6 +8,9 @@ import {
   Activity, Landmark, ShieldCheck, HelpCircle, Camera, Image as ImageIcon, X
 } from "lucide-react";
 import { toast } from "sonner";
+import { createClient } from "@/utils/supabase/client";
+import { pushUserDetails } from "@/utils/supabase/profile";
+
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -52,15 +55,109 @@ export default function OnboardingPage() {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     setLoading(true);
-    // Purely mock completion for demo
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Namaste! Your profile is ready.");
-      localStorage.setItem("krishidhara_user", JSON.stringify(formData));
+
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      console.log('[Setup] Auth user:', user?.id ?? 'null');
+      if (authError) console.error('[Setup] Auth error:', authError);
+
+      if (!user) {
+        toast.error("Session expired. Please login again.");
+        router.push("/login");
+        return;
+      }
+
+      // Build the local storage data structure (matches what dashboard reads)
+      const localData = {
+        name: formData.name,
+        village: formData.village,
+        state: formData.state,
+        district: formData.district,
+        ageGroup: formData.ageGroup,
+        landArea: formData.landArea,
+        landUnit: formData.landUnit,
+        landStatus: formData.landStatus,
+        crops: formData.crops,
+        seasons: formData.seasons,
+        irrigation: formData.irrigation,
+        monitoringTools: formData.monitoringTools,
+        soilHealth: formData.soilHealth,
+        pestManagement: formData.pestManagement,
+        machinery: formData.machinery,
+        lastYield: formData.lastYield,
+        challenges: formData.challenges,
+        alerts: formData.alerts,
+        pastSchemes: formData.pastSchemes,
+        supportInterests: formData.supportInterests,
+        profileImage: formData.profileImage,
+      };
+
+      // Save locally first for instant dashboard load
+      localStorage.setItem("krishidhara_user", JSON.stringify(localData));
+      // Clear any legacy demo mode flags
+      localStorage.removeItem("krishidhara_demo_mode");
+
+      // Sync to Supabase database
+      console.log('[Setup] User authenticated — syncing to Supabase via server API...');
+
+      const profilePayload = {
+        full_name: formData.name,
+        state: formData.state,
+        district: formData.district,
+        village: formData.village,
+        age_group: formData.ageGroup,
+        farm_details: {
+          profileImage: formData.profileImage,
+          landArea: formData.landArea,
+          landUnit: formData.landUnit,
+          landStatus: formData.landStatus,
+          crops: formData.crops,
+          seasons: formData.seasons,
+          irrigation: formData.irrigation,
+          monitoringTools: formData.monitoringTools,
+          soilHealth: formData.soilHealth,
+          pestManagement: formData.pestManagement,
+          machinery: formData.machinery,
+          lastYield: formData.lastYield,
+          challenges: formData.challenges,
+          alerts: formData.alerts,
+          pastSchemes: formData.pastSchemes,
+          supportInterests: formData.supportInterests,
+        }
+      };
+
+      try {
+        // Primary: server-side API route (correctly reads auth cookies)
+        const res = await fetch('/api/save-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(profilePayload),
+        });
+        const result = await res.json();
+
+        if (!res.ok) {
+          console.warn('[Setup] API route failed, trying client-side fallback:', result);
+          await pushUserDetails(user.id, profilePayload);
+        } else {
+          console.log('[Setup] Profile synced via API ✅', result);
+        }
+        toast.success("Namaste! Your profile is ready and synced to cloud. ✅");
+      } catch (syncErr) {
+        console.error('[Setup] Cloud sync failed:', syncErr);
+        toast.warning("Profile saved locally. Cloud sync failed — check browser console.");
+      }
+
       router.push("/");
-    }, 1500);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      toast.error("Failed to save profile. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleMultiSelect = (key: keyof typeof formData, value: string) => {

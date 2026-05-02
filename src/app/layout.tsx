@@ -2,13 +2,20 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { LanguageProvider } from "@/providers/LanguageProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "KrishiDhara | Empowering Farmers",
   description: "Advanced agriculture companion for Indian farmers with crop monitoring, market prices, and government schemes.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -19,10 +26,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <main className="min-h-screen bg-background">
-          {children}
-        </main>
-        <Toaster position="top-center" richColors />
+        <LanguageProvider>
+          <main className="min-h-screen bg-background">
+            {children}
+          </main>
+          <Toaster position="top-center" richColors />
+        </LanguageProvider>
       </body>
     </html>
   );
