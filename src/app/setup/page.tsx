@@ -179,30 +179,42 @@ export default function OnboardingPage() {
   const supportList = ["Income support", "Crop insurance", "Subsidies", "Irrigation support", "Credit/loans", "Training"];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--beige)" }}>
       {/* Progress Header */}
-      <div className="bg-white px-6 pt-12 pb-6 sticky top-0 z-10 shadow-sm">
+      <div
+        className="px-5 pt-12 pb-5 sticky top-0 z-10"
+        style={{
+          background: "linear-gradient(160deg, #1B5E20 0%, #2E7D32 100%)",
+          borderBottomLeftRadius: 24,
+          borderBottomRightRadius: 24,
+        }}
+      >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-slate-800">
-            {step === 1 && "Basic Info"}
-            {step === 2 && "Farm Details"}
-            {step === 3 && "Monitoring"}
-            {step === 4 && "Preferences"}
-          </h2>
-          <span className="text-sm font-bold text-primary-green bg-primary-green-light px-3 py-1 rounded-full">
-            {step} / {totalSteps}
-          </span>
+          <div>
+            <p className="text-green-200 text-xs font-semibold uppercase tracking-wider mb-0.5">Setup Step {step}/{totalSteps}</p>
+            <h2 className="text-white text-xl font-extrabold">
+              {step === 1 && "Basic Info 👤"}
+              {step === 2 && "Farm Details 🌾"}
+              {step === 3 && "Monitoring 📊"}
+              {step === 4 && "Preferences ⚙️"}
+            </h2>
+          </div>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg"
+            style={{ background: "rgba(255,255,255,0.15)", color: "white" }}>
+            {step}/{totalSteps}
+          </div>
         </div>
-        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-          <motion.div 
+        <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.2)" }}>
+          <motion.div
             initial={{ width: "25%" }}
             animate={{ width: `${(step / totalSteps) * 100}%` }}
-            className="h-full bg-primary-green"
+            className="h-full rounded-full"
+            style={{ background: "var(--yellow-accent)" }}
           />
         </div>
       </div>
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-5">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -568,25 +580,28 @@ export default function OnboardingPage() {
       </div>
 
       {/* Navigation Buttons */}
-      <div className="p-6 bg-white border-t border-slate-100 flex gap-4">
+      <div className="p-5 flex gap-3"
+        style={{ background: "white", borderTop: "1px solid var(--border)" }}>
         {step > 1 && (
-          <button 
+          <button
             onClick={prevStep}
-            className="btn-secondary flex-1 flex items-center justify-center gap-2"
+            className="flex-1 py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
+            style={{ background: "var(--beige)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
           >
-            <ChevronLeft size={20} /> Back
+            <ChevronLeft size={18} /> Back
           </button>
         )}
-        <button 
+        <button
           onClick={nextStep}
           disabled={loading}
-          className="btn-primary flex-[2] flex items-center justify-center gap-2"
+          className="flex-[2] py-4 rounded-2xl font-black text-white text-sm flex items-center justify-center gap-2"
+          style={{ background: "linear-gradient(135deg, #2E7D32, #388E3C)", boxShadow: "0 6px 20px rgba(46,125,50,0.3)" }}
         >
           {loading ? (
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              {step === totalSteps ? "Finish Setup" : "Continue"} <ChevronRight size={20} />
+              {step === totalSteps ? "✅ Finish Setup" : "Continue"} <ChevronRight size={18} />
             </>
           )}
         </button>

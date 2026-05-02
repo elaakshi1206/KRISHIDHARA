@@ -2,44 +2,130 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
 :root {
-  --background: #f0fdf4;
-  --foreground: #14532d;
-  
-  --primary-green: #16a34a;
-  --primary-green-light: #bbf7d0;
-  --primary-green-dark: #15803d;
-  --primary-green-xlight: #f0fdf4;
-  
-  --yellow-accent: #eab308;
-  --yellow-light: #fef9c3;
-  --yellow-dark: #ca8a04;
+  /* ── Core Brand ── */
+  --background: #FAF6EF;
+  --foreground: #1A1A1A;
+
+  /* ── Primary: Forest Green ── */
+  --primary-green: #2E7D32;
+  --primary-green-mid: #388E3C;
+  --primary-green-light: #4CAF50;
+  --primary-green-pale: #E8F5E9;
+  --primary-green-dark: #1B5E20;
+
+  /* ── Secondary: Warm Orange ── */
+  --orange: #FF9800;
+  --orange-dark: #F57C00;
+  --orange-light: #FFE0B2;
+  --orange-pale: #FFF3E0;
+
+  /* ── Accent: Sky Blue ── */
+  --sky-blue: #29B6F6;
+  --sky-blue-dark: #0288D1;
+  --sky-blue-pale: #E1F5FE;
+
+  /* ── Golden Yellow ── */
+  --yellow-accent: #FBC02D;
+  --yellow-light: #FFF8E1;
+  --yellow-dark: #F57F17;
+
+  /* ── Neutrals ── */
+  --beige: #FAF6EF;
+  --beige-dark: #F0EBE1;
+  --surface: #FFFFFF;
+  --text-primary: #1A1A1A;
+  --text-secondary: #555555;
+  --text-muted: #888888;
+  --border: #E8E0D5;
+
+  /* ── Semantic ── */
+  --success: #43A047;
+  --danger: #E53935;
+  --warning: #FF9800;
+
+  /* Legacy aliases (keeps existing components working) */
+  --primary-green-light: #C8E6C9;
+  --primary-green-xlight: #E8F5E9;
+  --yellow-light: #FFF8E1;
+  --yellow-dark: #F57F17;
 }
 
 @layer base {
+  html { font-family: 'Poppins', 'Segoe UI', sans-serif; }
   body {
-    @apply bg-[#f0fdf4] text-[#14532d] font-sans antialiased;
+    background-color: var(--beige);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+@layer utilities {
+  /* Hide scrollbar but keep scroll */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Safe area for bottom nav */
+  .pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
 }
 
 @layer components {
+  /* ── Buttons ── */
   .btn-primary {
-    @apply bg-[var(--primary-green)] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-700/20 active:scale-95 transition-all hover:bg-[var(--primary-green-dark)];
+    @apply bg-[var(--primary-green)] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all;
   }
-  
+  .btn-orange {
+    @apply bg-[var(--orange)] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-orange-400/30 active:scale-95 transition-all;
+  }
   .btn-secondary {
-    @apply bg-[var(--primary-green-xlight)] border-2 border-[var(--primary-green)] text-[var(--primary-green)] px-6 py-3 rounded-xl font-bold active:scale-95 transition-all hover:bg-[var(--primary-green-light)];
+    @apply bg-[var(--primary-green-pale)] border-2 border-[var(--primary-green)] text-[var(--primary-green)] px-6 py-3 rounded-2xl font-bold text-sm active:scale-95 transition-all;
   }
-
   .btn-yellow {
-    @apply bg-[var(--yellow-accent)] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-yellow-500/20 active:scale-95 transition-all hover:bg-[var(--yellow-dark)];
+    @apply bg-[var(--yellow-accent)] text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all;
   }
 
+  /* ── Cards ── */
   .card {
-    @apply bg-white rounded-2xl p-4 shadow-sm border border-green-100;
+    @apply bg-white rounded-3xl p-5 shadow-sm border border-[var(--border)];
+  }
+  .card-green {
+    @apply bg-gradient-to-br from-[var(--primary-green)] to-[var(--primary-green-dark)] rounded-3xl p-5 text-white shadow-xl;
+  }
+  .card-orange {
+    @apply bg-gradient-to-br from-[var(--orange)] to-[var(--orange-dark)] rounded-3xl p-5 text-white shadow-xl;
+  }
+  .card-blue {
+    @apply bg-gradient-to-br from-[var(--sky-blue)] to-[var(--sky-blue-dark)] rounded-3xl p-5 text-white shadow-xl;
   }
 
+  /* ── Inputs ── */
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-green-200 focus:outline-none focus:ring-2 focus:ring-[var(--primary-green)] focus:border-transparent transition-all bg-white;
+    @apply w-full px-4 py-3 rounded-2xl border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary-green)] focus:border-transparent transition-all bg-white text-sm font-medium;
+  }
+
+  /* ── Tags/Chips ── */
+  .chip-active {
+    @apply bg-[var(--primary-green)] text-white px-4 py-1.5 rounded-full text-xs font-bold;
+  }
+  .chip-inactive {
+    @apply bg-white border border-[var(--border)] text-[var(--text-secondary)] px-4 py-1.5 rounded-full text-xs font-semibold;
+  }
+
+  /* ── Status badges ── */
+  .badge-green { @apply bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full; }
+  .badge-orange { @apply bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full; }
+  .badge-red { @apply bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full; }
+  .badge-blue { @apply bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full; }
+
+  /* ── Section Headers ── */
+  .section-title {
+    @apply text-xl font-extrabold text-[var(--text-primary)] tracking-tight;
+  }
+  .section-subtitle {
+    @apply text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider;
   }
 }
+
